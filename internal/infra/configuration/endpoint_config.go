@@ -63,5 +63,21 @@ func GetEndpointEnv() []model.ApiService {
 
 	apiService = append(apiService, apiService03)
 
+	var apiService04 model.ApiService
+	if os.Getenv("URL_SERVICE_04") !=  "" {
+		apiService04.Url = os.Getenv("URL_SERVICE_04")
+	}
+	if os.Getenv("X_APIGW_API_ID_SERVICE_04") !=  "" {
+		apiService04.Header_x_apigw_api_id = os.Getenv("X_APIGW_API_ID_SERVICE_04")
+	}
+	if os.Getenv("METHOD_SERVICE_03") !=  "" {
+		apiService04.Method = os.Getenv("METHOD_SERVICE_04")
+	}
+	if os.Getenv("NAME_SERVICE_03") !=  "" {
+		apiService04.Name = os.Getenv("NAME_SERVICE_04")
+	}
+
+	apiService = append(apiService, apiService04)
+
 	return apiService
 }

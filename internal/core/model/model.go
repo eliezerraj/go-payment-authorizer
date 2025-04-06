@@ -43,11 +43,14 @@ type ApiService struct {
 
 type Card struct {
 	ID				int			`json:"id,omitempty"`
+	FkAccountID		int			`json:"fk_account_id,omitempty"`
+	AccountID		string		`json:"account_id,omitempty"`	
 	CardNumber		string  	`json:"card_number,omitempty"`
 	TokenData		string  	`json:"token_data,omitempty"`
-	Type			string  	`json:"type,omitempty"`
-	Model			string  	`json:"model,omitempty"`
-	Atc				int  		`json:"atc,omitempty"`
+	Holder			string  	`json:"holder,omitempty"`
+	Type			string  	`json:"card_type,omitempty"`
+	Model			string  	`json:"card_model,omitempty"`
+	Atc				int			`json:"atc,omitempty"`
 	Status			string  	`json:"status,omitempty"`
 	ExpiredAt		time.Time 	`json:"expired_at,omitempty"`
 	CreatedAt		time.Time 	`json:"created_at,omitempty"`
@@ -71,9 +74,15 @@ type Payment struct {
 	TransactionId	*string  	`json:"transaction_id,omitempty"`
 	FkTerminalId	int			`json:"fk_terminal_id,omitempty"`
 	Terminal		string		`json:"terminal,omitempty"`
+	StepProcess		*[]StepProcess	`json:"step_process,omitempty"`
 	CreatedAt		time.Time 	`json:"created_at,omitempty"`
 	UpdatedAt		*time.Time 	`json:"updated_at,omitempty"`
 	TenantID		string  	`json:"tenant_id,omitempty"`
+}
+
+type StepProcess struct {
+	Name		string  	`json:"step_process,omitempty"`
+	ProcessedAt	time.Time 	`json:"processed_at,omitempty"`
 }
 
 type Terminal struct {
@@ -84,4 +93,29 @@ type Terminal struct {
 	Status			string  	`json:"status,omitempty"`
 	CreatedAt		time.Time 	`json:"created_at,omitempty"`
 	UpdatedAt		*time.Time 	`json:"updated_at,omitempty"`
+}
+
+type TransactionLimit struct {
+	ID				int			`json:"id,omitempty"`
+	Category		string 		`json:"category,omitempty"`
+	CardNumber		string 		`json:"card_number,omitempty"`
+	TransactionId	string 		`json:"transaction_id,omitempty"`
+	Mcc				string 		`json:"mcc,omitempty"`
+	Status			string 		`json:"status,omitempty"`
+	TransactionAt	time.Time 	`json:"transaction_at,omitempty"`		
+	Currency		string 		`json:"currency,omitempty"`
+	Amount			float64 	`json:"amount,omitempty"`
+	SumAmount		float64 	`json:"transaction_sum_amount,omitempty"`
+	SumCount		int 		`json:"transaction_sum_count,omitempty"`
+	TenantID		string 		`json:"tenant_id,omitempty"`
+}
+
+// go-ledger
+type Moviment struct {
+	AccountID		string  	`json:"account_id,omitempty"`
+	Type			string  	`json:"type,omitempty"`
+	Currency		string  	`json:"currency,omitempty"`
+	Amount			float64		`json:"amount,omitempty"`
+	TransactionAt	*time.Time 	`json:"transaction_at,omitempty"`
+	TenantID		string  	`json:"tenant_id,omitempty"`
 }

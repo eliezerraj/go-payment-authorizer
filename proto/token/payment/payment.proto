@@ -20,10 +20,16 @@ message Payment {
     string transaction_id = 11 [json_name = "transaction_id"];
 }
 
+message Step{
+  string step_process = 1 [json_name = "step_process"];
+  google.protobuf.Timestamp processed_at = 2 [json_name = "processed_at"];
+} 
+
 message PaymentTokenRequest {
     Payment payment = 1;
 }
 
 message PaymentTokenResponse {
   Payment payment = 1;
+  repeated Step steps = 2;
 }

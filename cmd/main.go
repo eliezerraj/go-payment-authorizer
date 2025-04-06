@@ -16,7 +16,7 @@ import(
 	adapter_grpc_client "github.com/go-payment-authorizer/internal/adapter/grpc/client"
 
 	go_core_pg "github.com/eliezerraj/go-core/database/pg"  
-	grpc_adapter "github.com/go-payment-authorizer/internal/adapter/grpc"
+	grpc_adapter "github.com/go-payment-authorizer/internal/adapter/grpc/server"
 )
 
 var(

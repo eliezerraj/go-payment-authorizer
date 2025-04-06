@@ -1,4 +1,4 @@
-package grpc
+package server
 
 import (
 	"fmt"
@@ -14,6 +14,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 
 	token_proto_service "github.com/go-payment-authorizer/protogen/token"
@@ -23,7 +24,7 @@ import (
 	go_core_observ "github.com/eliezerraj/go-core/observability"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc").Logger()
+var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc.server").Logger()
 var tracerProvider go_core_observ.TracerProvider
 
 type AdapterGrpc struct{
@@ -66,11 +67,17 @@ func (a *AdapterGrpc) GetPod(ctx context.Context, podRequest *proto.PodRequest) 
 
 // About get card from token
 func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto.PaymentTokenRequest) (*proto.PaymentTokenResponse, error) {
-	childLogger.Info().Str("func","AddPaymentToken").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("paymentRequest", paymentRequest).Send()
+	childLogger.Info().Str("func","AddPaymentToken").Interface("paymentRequest", paymentRequest).Send()
 
 	// Trace
 	span := tracerProvider.Span(ctx, "adpater.grpc.AddPaymentToken")
 	defer span.End()
+
+	// get request-id
+	header, _ := metadata.FromIncomingContext(ctx)
+	if len(header.Get("trace-request-id")) > 0 {
+		ctx = context.WithValue(ctx, "trace-request-id", header.Get("trace-request-id")[0])
+	}
 
 	// Prepare
 	payment := model.Payment{ TokenData: paymentRequest.Payment.TokenData,
@@ -118,6 +125,13 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 		}
 	}	
 
+	res_list_step_proto := []*proto.Step{}
+	for _, v := range *res_payment.StepProcess {
+		step_proto := proto.Step{StepProcess: v.Name,
+								 ProcessedAt: timestamppb.New(v.ProcessedAt)}
+		res_list_step_proto = append(res_list_step_proto, &step_proto)
+	}
+
 	res_payment_proto_response := &proto.PaymentTokenResponse {
 		Payment: &proto.Payment{	TokenData: 	res_payment.TokenData,
 									CardType:  	res_payment.CardType,
@@ -131,7 +145,10 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 									TransactionId: *res_payment.TransactionId,
 									PaymentAt: 	timestamppb.New(res_payment.PaymentAt),
 							},	
+		Steps: res_list_step_proto,						
 	}
+
+	childLogger.Info().Str("func","**********>").Interface("res_payment_proto_response", res_payment_proto_response).Send()
 
 	return res_payment_proto_response, nil
 }
