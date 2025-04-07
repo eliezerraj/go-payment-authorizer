@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: &app-name go-limit-cm
+  name: &app-name go-payment-authorizer-cm
   namespace: test-a
   labels:
     app: *app-name
 data:
   API_VERSION: "3.0"
-  POD_NAME: "go-limit.k8"
+  POD_NAME: "go-payment-authorizer.k8"
   PORT: "6001"
   DB_HOST: "rds-proxy-db-arch-02.proxy-cj4aqa08ettf.us-east-2.rds.amazonaws.com"
   DB_PORT: "5432"
