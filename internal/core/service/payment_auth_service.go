@@ -117,14 +117,16 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	payment.CardAtc = (*res_list_card)[0].Atc
 	payment.CardType = (*res_list_card)[0].Type
 	payment.FkTerminalId = res_terminal.ID
-	payment.Status = "AUTHORIZATION-PENDING:GRPC"
+	payment.RequestId = &trace_id
+	payment.Status = "AUTHORIZATION-GRPC:PENDING"
 
 	// create a payment
 	res_payment, err := s.workerRepository.AddPayment(ctx, tx, &payment)
 	if err != nil {
 		return nil, err
 	}
-	
+	payment.ID = res_payment.ID // Set PK
+
 	// Create a StepProcess
 	list_stepProcess := []model.StepProcess{}
 	stepProcess01 := model.StepProcess{Name: "AUTHORIZATION-PENDING:GRPC",
@@ -135,14 +137,12 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	// STEP-2
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 02 <===")
 	// Check the limits
-	transactionLimit := model.TransactionLimit{
-		Category: 		"CREDIT",
-		CardNumber: 	payment.CardNumber,
-		TransactionId: 	*payment.TransactionId,
-		Mcc: 			payment.Mcc,
-		Currency:		payment.Currency,
-		Amount:			payment.Amount,
-	}
+	transactionLimit := model.TransactionLimit{ Category: 		"CREDIT",
+												CardNumber: 	payment.CardNumber,
+												TransactionId: 	*payment.TransactionId,
+												Mcc: 			payment.Mcc,
+												Currency:		payment.Currency,
+												Amount:			payment.Amount }
 
 	// Call go-limit
 	res_limit, statusCode, err := apiService.CallApi(ctx,
@@ -180,6 +180,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 								Type: "WITHDRAW",
 								Currency: payment.Currency,
 								Amount: payment.Amount }
+
 	_, statusCode, err = apiService.CallApi(ctx,
 											s.apiService[2].Url + "/movimentTransaction",
 											s.apiService[2].Method,
@@ -215,8 +216,10 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	list_stepProcess = append(list_stepProcess, stepProcess05)
 	
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - UPDATE PAYMENT <===")
+	
 	// update status payment
-	res_update, err := s.workerRepository.UpdatePayment(ctx, tx, *res_payment)
+	payment.Status = "AUTHORIZATION-GRPC:OK"
+	res_update, err := s.workerRepository.UpdatePayment(ctx, tx, payment)
 	if err != nil {
 		return nil, err
 	}
