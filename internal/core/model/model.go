@@ -48,8 +48,8 @@ type Card struct {
 	CardNumber		string  	`json:"card_number,omitempty"`
 	TokenData		string  	`json:"token_data,omitempty"`
 	Holder			string  	`json:"holder,omitempty"`
-	Type			string  	`json:"card_type,omitempty"`
-	Model			string  	`json:"card_model,omitempty"`
+	Type			string  	`json:"type,omitempty"`
+	Model			string  	`json:"model,omitempty"`
 	Atc				int			`json:"atc,omitempty"`
 	Status			string  	`json:"status,omitempty"`
 	ExpiredAt		time.Time 	`json:"expired_at,omitempty"`
@@ -72,6 +72,7 @@ type Payment struct {
 	Amount			float64 	`json:"amount,omitempty"`
 	PaymentAt		time.Time	`json:"payment_at,omitempty"`
 	TransactionId	*string  	`json:"transaction_id,omitempty"`
+	RequestId		*string  	`json:"request_id,omitempty"`
 	FkTerminalId	int			`json:"fk_terminal_id,omitempty"`
 	Terminal		string		`json:"terminal,omitempty"`
 	StepProcess		*[]StepProcess	`json:"step_process,omitempty"`

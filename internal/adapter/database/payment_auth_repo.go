@@ -48,7 +48,7 @@ func (w *WorkerRepository) AddPayment(ctx context.Context, tx pgx.Tx, payment *m
 	}
 
 	// Query and execute
-	query := `INSERT INTO payment (fk_card_id, 
+	query := `INSERT INTO payment ( fk_card_id, 
 									card_number, 
 									fk_terminal_id, 
 									terminal, 
@@ -60,11 +60,12 @@ func (w *WorkerRepository) AddPayment(ctx context.Context, tx pgx.Tx, payment *m
 									currency, 
 									amount,
 									transaction_id,
+									request_id,
 									created_at,
 									tenant_id)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`
 
-	row := tx.QueryRow(ctx, query, payment.FkCardId,
+	row := tx.QueryRow(ctx, query,  payment.FkCardId,
 									payment.CardNumber,
 									payment.FkTerminalId,
 									payment.Terminal,
@@ -76,6 +77,7 @@ func (w *WorkerRepository) AddPayment(ctx context.Context, tx pgx.Tx, payment *m
 									payment.Currency,
 									payment.Amount,
 									payment.TransactionId,
+									payment.RequestId,
 									payment.CreatedAt ,
 									payment.TenantID)
 
