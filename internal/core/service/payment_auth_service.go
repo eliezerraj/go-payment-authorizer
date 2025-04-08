@@ -144,14 +144,24 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 												Currency:		payment.Currency,
 												Amount:			payment.Amount }
 
+	// Set headers
+	headers := map[string]string{
+		"Content-Type":  "application/json;charset=UTF-8",
+		"X-Request-Id": trace_id,
+		"Host": s.apiService[1].HostName,
+	}
+
+	httpClient := go_core_api.HttpClient {
+		Url: 	s.apiService[1].Url + "/transactionLimit",
+		Method: s.apiService[1].Method,
+		Timeout: 15,
+		Headers: &headers,
+	}
+
 	// Call go-limit
-	res_limit, statusCode, err := apiService.CallApi(ctx,
-													s.apiService[1].Url + "/transactionLimit",
-													s.apiService[1].Method,
-													&s.apiService[1].Header_x_apigw_api_id,
-													nil,
-													&trace_id, 
-													transactionLimit)
+	res_limit, statusCode, err := apiService.CallRestApi(ctx,
+														httpClient, 
+														transactionLimit)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
 	}

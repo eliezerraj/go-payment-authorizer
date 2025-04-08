@@ -8,15 +8,31 @@ metadata:
 data:
   API_VERSION: "3.0"
   POD_NAME: "go-payment-authorizer.k8"
-  PORT: "6001"
-  DB_HOST: "rds-proxy-db-arch-02.proxy-cj4aqa08ettf.us-east-2.rds.amazonaws.com"
+  PORT: ":65000"
+  DB_HOST: "rds-proxy-db-arch.proxy-couoacqalfwt.us-east-2.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "postgres"
   DB_SCHEMA: "public"
   DB_DRIVER: "postgres"
   SETPOD_AZ: "false"
   ENV: "dev"  
-  OTEL_EXPORTER_OTLP_ENDPOINT: "arch-eks-02-xray-collector.default.svc.cluster.local:4317"
+
+  OTEL_EXPORTER_OTLP_ENDPOINT: "arch-eks-01-xray-collector.default.svc.cluster.local:4317"
   USE_STDOUT_TRACER_EXPORTER: "false"
   USE_OTLP_COLLECTOR: "true" 
-  AWS_CLOUDWATCH_LOG_GROUP_NAMES: "/dock/eks/eks-arch-02"
+  AWS_CLOUDWATCH_LOG_GROUP_NAMES: "/dock/eks/eks-arch-1"
+
+  NAME_SERVICE_01: "go-tokenization-grpc"
+  URL_SERVICE_01: "dns:///nlb-go-tokenization-grpc-ead977511b03d593.elb.us-east-2.amazonaws.com:65001"
+
+  NAME_SERVICE_02: "go-limit"
+  URL_SERVICE_02: "https://nlb-eks-arch-02.architecturedev.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
+  METHOD_SERVICE_02: "POST"
+
+  NAME_SERVICE_03: "go-ledger"
+  URL_SERVICE_03: "https://nlb-eks-arch-01.architecture.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
+  METHOD_SERVICE_03: "POST"
+
+  NAME_SERVICE_04: "go-card"
+  URL_SERVICE_04: "https://nlb-eks-arch-02.architecturedev.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
+  METHOD_SERVICE_04: "POST"
