@@ -85,7 +85,7 @@ func GetEndpointEnv() []model.ApiService {
 		apiService04.Name = os.Getenv("NAME_SERVICE_04")
 	}
 	if os.Getenv("HOST_SERVICE_04") !=  "" {
-		apiService03.HostName = os.Getenv("HOST_SERVICE_04")
+		apiService04.HostName = os.Getenv("HOST_SERVICE_04")
 	}
 	apiService = append(apiService, apiService04)
 
