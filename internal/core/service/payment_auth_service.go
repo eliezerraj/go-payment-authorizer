@@ -95,8 +95,8 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, err
 	}
 
-	// STEP-1
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 01 <===")
+	// ------------------------  STEP-1 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 01 (AddPayment) <===")
 	// Get a card from token (call token-grpc)
 
 	card := model.Card{	TokenData: 	payment.TokenData,
@@ -134,8 +134,8 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	list_stepProcess = append(list_stepProcess, stepProcess01)
 	payment.StepProcess = &list_stepProcess
 
-	// STEP-2
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 02 <===")
+	// ------------------------  STEP-2 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 02 (LIMIT) <===")
 	// Check the limits
 	transactionLimit := model.TransactionLimit{ Category: 		"CREDIT",
 												CardNumber: 	payment.CardNumber,
@@ -146,13 +146,14 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 
 	// Set headers
 	headers := map[string]string{
-		"Content-Type":  "application/json;charset=UTF-8",
+		"Content-Type": "application/json",
 		"X-Request-Id": trace_id,
+		"x-apigw-api-id": s.apiService[1].XApigwApiId,
 		"Host": s.apiService[1].HostName,
 	}
-
+	// Prepare http client
 	httpClient := go_core_api.HttpClient {
-		Url: 	s.apiService[1].Url + "/transactionLimit",
+		Url: fmt.Sprintf("%v%v",s.apiService[1].Url,"/transactionLimit"),
 		Method: s.apiService[1].Method,
 		Timeout: 15,
 		Headers: &headers,
@@ -163,6 +164,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 														httpClient, 
 														transactionLimit)
 	if err != nil {
+		childLogger.Error().Err(err).Msg("apiService.CallRestApi")
 		return nil, errorStatusCode(statusCode)
 	}
 
@@ -177,27 +179,37 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess02)
 
-	//childLogger.Info().Str("func","AddPaymentToken: ===> STEP-2").Interface("transactionLimit", transactionLimit).Send()
-
-	// STEP-3
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 03 <===")
+	// ------------------------  STEP-3 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 03 (FRAUD) <===")
 	// Check Fraud
 
-	// STEP-4
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 04 <===")
+	// ------------------------  STEP-4 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 04 (LEDGER) <===")
 	// Access Account (ledger)
 	moviment := model.Moviment{	AccountID: (*res_list_card)[0].AccountID,
 								Type: "WITHDRAW",
 								Currency: payment.Currency,
 								Amount: payment.Amount }
 
-	_, statusCode, err = apiService.CallApi(ctx,
-											s.apiService[2].Url + "/movimentTransaction",
-											s.apiService[2].Method,
-											&s.apiService[2].Header_x_apigw_api_id,
-											nil,
-											&trace_id, 
-											moviment)
+	// Set headers
+	headers = map[string]string{
+		"Content-Type":  "application/json;charset=UTF-8",
+		"X-Request-Id": trace_id,
+		"x-apigw-api-id": s.apiService[2].XApigwApiId,
+		"Host": s.apiService[2].HostName,
+	}
+	// prepare http client
+	httpClient = go_core_api.HttpClient {
+		Url: 	s.apiService[2].Url + "/movimentTransaction",
+		Method: s.apiService[2].Method,
+		Timeout: 15,
+		Headers: &headers,
+	}
+
+	// Call go-ledger
+	_, statusCode, err = apiService.CallRestApi(ctx,
+												httpClient, 
+												moviment)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
 	}
@@ -207,16 +219,28 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess04)
 
-	// STEP 05
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 05 <===")
+	// ------------------------  STEP-5 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 05 (CARDS:ATC) <===")
+	// Set headers
+	
+	headers = map[string]string{
+		"Content-Type":  "application/json;charset=UTF-8",
+		"X-Request-Id": trace_id,
+		"x-apigw-api-id": s.apiService[3].XApigwApiId,
+		"Host": s.apiService[3].HostName,
+	}
+	// prepare http client
+	httpClient = go_core_api.HttpClient {
+		Url: 	s.apiService[3].Url + "/atc",
+		Method: s.apiService[3].Method,
+		Timeout: 15,
+		Headers: &headers,
+	}
+
 	// update card atc
-	_, statusCode, err = apiService.CallApi(ctx,
-											s.apiService[3].Url + "/atc",
-											s.apiService[3].Method,
-											&s.apiService[3].Header_x_apigw_api_id,
-											nil,
-											&trace_id, 
-											card)
+	_, statusCode, err = apiService.CallRestApi(ctx,
+												httpClient, 
+												card)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
 	}
@@ -225,7 +249,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess05)
 	
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - UPDATE PAYMENT <===")
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - (UPDATE PAYMENT) <===")
 	
 	// update status payment
 	payment.Status = "AUTHORIZATION-GRPC:OK"
