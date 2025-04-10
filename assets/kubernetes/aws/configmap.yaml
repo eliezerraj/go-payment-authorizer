@@ -22,20 +22,20 @@ data:
   USE_OTLP_COLLECTOR: "true" 
   AWS_CLOUDWATCH_LOG_GROUP_NAMES: "/dock/eks/eks-arch-1"
 
-  NAME_SERVICE_01: "go-tokenization-grpc"
-  URL_SERVICE_01: "dns:///nlb-go-tokenization-grpc-ead977511b03d593.elb.us-east-2.amazonaws.com:65001"
+  NAME_SERVICE_00: "go-tokenization-grpc"
+  URL_SERVICE_00: "dns:///nlb-go-tokenization-grpc-ead977511b03d593.elb.us-east-2.amazonaws.com:65001"
 
-  NAME_SERVICE_02: "go-limit"
-  URL_SERVICE_02: "https://nlb-eks-arch-02.architecturedev.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
+  NAME_SERVICE_01: "go-limit"
+  URL_SERVICE_01: "https://nlb-eks-arch-02.architecturedev.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
+  METHOD_SERVICE_01: "POST"
+  HOST_SERVICE_01: "go-limit.architecturedev.caradhras.io"
+
+  NAME_SERVICE_02: "go-ledger"
+  URL_SERVICE_02: "https://nlb-eks-arch-01.architecture.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
   METHOD_SERVICE_02: "POST"
-  HOST_SERVICE_02: "go-limit.architecturedev.caradhras.io"
+  HOST_SERVICE_02: "go-ledger.architecture.caradhras.io"
 
-  NAME_SERVICE_03: "go-ledger"
-  URL_SERVICE_03: "https://nlb-eks-arch-01.architecture.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
+  NAME_SERVICE_03: "go-card"
+  URL_SERVICE_03: "https://nlb-eks-arch-02.architecturedev.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
   METHOD_SERVICE_03: "POST"
-  HOST_SERVICE_03: "go-ledger.architecture.caradhras.io"
-
-  NAME_SERVICE_04: "go-card"
-  URL_SERVICE_04: "https://nlb-eks-arch-02.architecturedev.caradhras.io" #https://vpce.global.dev.caradhras.io/pv
-  METHOD_SERVICE_04: "POST"
-  HOST_SERVICE_04: "go-card.architecturedev.caradhras.io"
+  HOST_SERVICE_03: "go-card.architecturedev.caradhras.io"
