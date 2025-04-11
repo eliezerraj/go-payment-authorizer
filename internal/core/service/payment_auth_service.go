@@ -130,10 +130,11 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, err
 	}
 	payment.ID = res_payment.ID // Set PK
-
+	payment.CreatedAt = res_payment.CreatedAt
+	
 	// Create a StepProcess
 	list_stepProcess := []model.StepProcess{}
-	stepProcess01 := model.StepProcess{Name: "AUTHORIZATION-PENDING:GRPC",
+	stepProcess01 := model.StepProcess{Name: "AUTHORIZATION-GRPC:STATUS:PENDING",
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess01)
 	payment.StepProcess = &list_stepProcess
@@ -189,7 +190,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	// ------------------------  STEP-4 ----------------------------------//
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 04 (LEDGER) <===")
 	// Access Account (ledger)
-	moviment := model.Moviment{	AccountID: (*res_list_card)[0].AccountID,
+	moviment := model.Moviment{	AccountFrom: model.Account{AccountID: (*res_list_card)[0].AccountID}, 
 								Type: "WITHDRAW",
 								Currency: payment.Currency,
 								Amount: payment.Amount }
@@ -265,7 +266,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, err
 	}
 
-	stepProcess06 := model.StepProcess{Name: "AUTHORIZATION-GRPC:OK",
+	stepProcess06 := model.StepProcess{Name: "AUTHORIZATION-GRPC:STATUS:OK",
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess06)
 	payment.StepProcess = &list_stepProcess
