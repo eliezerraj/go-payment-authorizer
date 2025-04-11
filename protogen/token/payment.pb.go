@@ -35,6 +35,7 @@ type Payment struct {
 	Mcc           string                 `protobuf:"bytes,9,opt,name=mcc,proto3" json:"mcc,omitempty"`
 	PaymentAt     *timestamp.Timestamp   `protobuf:"bytes,10,opt,name=payment_at,proto3" json:"payment_at,omitempty"`
 	TransactionId string                 `protobuf:"bytes,11,opt,name=transaction_id,proto3" json:"transaction_id,omitempty"`
+	CreatedAt     *timestamp.Timestamp   `protobuf:"bytes,12,opt,name=created_at,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -144,6 +145,13 @@ func (x *Payment) GetTransactionId() string {
 		return x.TransactionId
 	}
 	return ""
+}
+
+func (x *Payment) GetCreatedAt() *timestamp.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
 }
 
 type Step struct {
@@ -298,7 +306,7 @@ var File_proto_token_payment_payment_proto protoreflect.FileDescriptor
 
 const file_proto_token_payment_payment_proto_rawDesc = "" +
 	"\n" +
-	"!proto/token/payment/payment.proto\x12\x05token\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe1\x02\n" +
+	"!proto/token/payment/payment.proto\x12\x05token\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\x03\n" +
 	"\aPayment\x12\x1e\n" +
 	"\n" +
 	"token_data\x18\x01 \x01(\tR\n" +
@@ -317,7 +325,10 @@ const file_proto_token_payment_payment_proto_rawDesc = "" +
 	"payment_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"payment_at\x12&\n" +
-	"\x0etransaction_id\x18\v \x01(\tR\x0etransaction_id\"j\n" +
+	"\x0etransaction_id\x18\v \x01(\tR\x0etransaction_id\x12:\n" +
+	"\n" +
+	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"created_at\"j\n" +
 	"\x04Step\x12\"\n" +
 	"\fstep_process\x18\x01 \x01(\tR\fstep_process\x12>\n" +
 	"\fprocessed_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\fprocessed_at\"?\n" +
@@ -349,15 +360,16 @@ var file_proto_token_payment_payment_proto_goTypes = []any{
 }
 var file_proto_token_payment_payment_proto_depIdxs = []int32{
 	4, // 0: token.Payment.payment_at:type_name -> google.protobuf.Timestamp
-	4, // 1: token.Step.processed_at:type_name -> google.protobuf.Timestamp
-	0, // 2: token.PaymentTokenRequest.payment:type_name -> token.Payment
-	0, // 3: token.PaymentTokenResponse.payment:type_name -> token.Payment
-	1, // 4: token.PaymentTokenResponse.steps:type_name -> token.Step
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	4, // 1: token.Payment.created_at:type_name -> google.protobuf.Timestamp
+	4, // 2: token.Step.processed_at:type_name -> google.protobuf.Timestamp
+	0, // 3: token.PaymentTokenRequest.payment:type_name -> token.Payment
+	0, // 4: token.PaymentTokenResponse.payment:type_name -> token.Payment
+	1, // 5: token.PaymentTokenResponse.steps:type_name -> token.Step
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_proto_token_payment_payment_proto_init() }

@@ -86,7 +86,7 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 							  Amount: paymentRequest.Payment.Amount,
 							  CardType: paymentRequest.Payment.CardType,
 							  Mcc: paymentRequest.Payment.Mcc,
-							  TransactionId : &paymentRequest.Payment.TransactionId,						
+							  TransactionId : &paymentRequest.Payment.TransactionId,			
 							}
 
 	// Call service
@@ -144,6 +144,7 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 									Terminal: 	res_payment.Terminal,
 									TransactionId: *res_payment.TransactionId,
 									PaymentAt: 	timestamppb.New(res_payment.PaymentAt),
+									CreatedAt:  timestamppb.New(res_payment.CreatedAt),
 							},	
 		Steps: res_list_step_proto,						
 	}

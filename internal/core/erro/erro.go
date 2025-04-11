@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrCardTypeInvalid	= errors.New("card type invalid")
+	ErrTransactioInvalid = errors.New("transaction is in null")
 	ErrNotFound 		= errors.New("item not found")
 	ErrUpdate			= errors.New("update unsuccessful")
 	ErrServer		 	= errors.New("server identified error")

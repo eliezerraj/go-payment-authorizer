@@ -43,18 +43,19 @@ func NewWorkerService(	workerRepository 	*database.WorkerRepository,
 }
 
 // About handle/convert http status code
-func errorStatusCode(statusCode int) error{
+func errorStatusCode(statusCode int, serviceName string) error{
+	childLogger.Info().Str("func","errorStatusCode").Interface("serviceName", serviceName).Interface("statusCode", statusCode).Send()
 	var err error
 	switch statusCode {
-	case http.StatusUnauthorized:
-		err = erro.ErrUnauthorized
-	case http.StatusForbidden:
-		err = erro.ErrHTTPForbiden
-	case http.StatusNotFound:
-		err = erro.ErrNotFound
-	default:
-		err = erro.ErrServer
-	}
+		case http.StatusUnauthorized:
+			err = erro.ErrUnauthorized
+		case http.StatusForbidden:
+			err = erro.ErrHTTPForbiden
+		case http.StatusNotFound:
+			err = erro.ErrNotFound
+		default:
+			err = errors.New(fmt.Sprintf("service %s in outage", serviceName))
+		}
 	return err
 }
 
@@ -87,7 +88,10 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	if (payment.CardType != "CREDIT") && (payment.CardType != "DEBIT") {
 		return nil, erro.ErrCardTypeInvalid
 	}
-
+	if payment.TransactionId == nil  {
+		return nil, erro.ErrTransactioInvalid
+	}
+	
 	// Get terminal
 	terminal := model.Terminal{Name: payment.Terminal}
 	res_terminal, err := s.workerRepository.GetTerminal(ctx, terminal)
@@ -96,7 +100,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	}
 
 	// ------------------------  STEP-1 ----------------------------------//
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 01 (AddPayment) <===")
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 01 (PAYMENT) <===")
 	// Get a card from token (call token-grpc)
 
 	card := model.Card{	TokenData: 	payment.TokenData,
@@ -126,10 +130,11 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, err
 	}
 	payment.ID = res_payment.ID // Set PK
-
+	payment.CreatedAt = res_payment.CreatedAt
+	
 	// Create a StepProcess
 	list_stepProcess := []model.StepProcess{}
-	stepProcess01 := model.StepProcess{Name: "AUTHORIZATION-PENDING:GRPC",
+	stepProcess01 := model.StepProcess{Name: "AUTHORIZATION-GRPC:STATUS:PENDING",
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess01)
 	payment.StepProcess = &list_stepProcess
@@ -164,8 +169,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 														httpClient, 
 														transactionLimit)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("apiService.CallRestApi")
-		return nil, errorStatusCode(statusCode)
+		return nil, errorStatusCode(statusCode, s.apiService[1].Name)
 	}
 
 	jsonString, err  := json.Marshal(res_limit)
@@ -186,7 +190,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	// ------------------------  STEP-4 ----------------------------------//
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 04 (LEDGER) <===")
 	// Access Account (ledger)
-	moviment := model.Moviment{	AccountID: (*res_list_card)[0].AccountID,
+	moviment := model.Moviment{	AccountFrom: model.Account{AccountID: (*res_list_card)[0].AccountID}, 
 								Type: "WITHDRAW",
 								Currency: payment.Currency,
 								Amount: payment.Amount }
@@ -211,7 +215,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 												httpClient, 
 												moviment)
 	if err != nil {
-		return nil, errorStatusCode(statusCode)
+		return nil, errorStatusCode(statusCode, s.apiService[2].Name)
 	}
 
 	// add step 04
@@ -242,7 +246,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 												httpClient, 
 												card)
 	if err != nil {
-		return nil, errorStatusCode(statusCode)
+		return nil, errorStatusCode(statusCode, s.apiService[3].Name)
 	}
 
 	stepProcess05 := model.StepProcess{	Name: "CARD-ATC:OK",
@@ -261,6 +265,11 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		err = erro.ErrUpdate
 		return nil, err
 	}
+
+	stepProcess06 := model.StepProcess{Name: "AUTHORIZATION-GRPC:STATUS:OK",
+										ProcessedAt: time.Now(),}
+	list_stepProcess = append(list_stepProcess, stepProcess06)
+	payment.StepProcess = &list_stepProcess
 
 	childLogger.Info().Str("func","AddPaymentToken: ===> FINAL").Interface("payment", payment).Send()
 

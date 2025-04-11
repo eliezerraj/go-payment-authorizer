@@ -18,6 +18,7 @@ message Payment {
     string mcc         = 9 [json_name = "mcc"];
     google.protobuf.Timestamp payment_at = 10 [json_name = "payment_at"];
     string transaction_id = 11 [json_name = "transaction_id"];
+    google.protobuf.Timestamp created_at = 12 [json_name = "created_at"];
 }
 
 message Step{
