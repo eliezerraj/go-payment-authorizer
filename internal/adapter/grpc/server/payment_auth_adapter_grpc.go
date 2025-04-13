@@ -22,6 +22,9 @@ import (
 	//proto "github.com/eliezerraj/go-grpc-proto/protogen/token"
 
 	go_core_observ "github.com/eliezerraj/go-core/observability"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/contrib/propagators/aws/xray"
 )
 
 var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc.server").Logger()
@@ -68,6 +71,11 @@ func (a *AdapterGrpc) GetPod(ctx context.Context, podRequest *proto.PodRequest) 
 // About get card from token
 func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto.PaymentTokenRequest) (*proto.PaymentTokenResponse, error) {
 	childLogger.Info().Str("func","AddPaymentToken").Interface("paymentRequest", paymentRequest).Send()
+
+	// get span trace-id
+	otel.SetTextMapPropagator(xray.Propagator{})
+	md, _ := metadata.FromIncomingContext(ctx)
+	ctx = otel.GetTextMapPropagator().Extract(ctx, go_core_observ.MetadataCarrier{md})
 
 	// Trace
 	span := tracerProvider.Span(ctx, "adpater.grpc.AddPaymentToken")
@@ -149,7 +157,7 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 		Steps: res_list_step_proto,						
 	}
 
-	childLogger.Info().Str("func","**********>").Interface("res_payment_proto_response", res_payment_proto_response).Send()
+	childLogger.Info().Str("func","AddPaymentToken").Interface("=====> res_payment_proto_response", res_payment_proto_response).Send()
 
 	return res_payment_proto_response, nil
 }

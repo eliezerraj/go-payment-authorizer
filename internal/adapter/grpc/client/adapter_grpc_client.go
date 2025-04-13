@@ -13,6 +13,8 @@ import (
 	go_grpc_client "github.com/eliezerraj/go-core/grpc"	
 	proto "github.com/go-payment-authorizer/protogen/token"
 
+	"go.opentelemetry.io/otel"
+
 	//proto "github.com/eliezerraj/go-grpc-proto/protogen/token"
 )
 
@@ -53,6 +55,11 @@ func (a *AdapterGrpc) GetCardTokenGrpc(ctx context.Context, card model.Card) (*[
 	// Set header for observability
 	header := metadata.New(map[string]string{ "trace-request-id": fmt.Sprintf("%s",ctx.Value("trace-request-id")) })
 	ctx = metadata.NewOutgoingContext(ctx, header)
+
+	// trace grpc
+	md := metadata.New(nil)
+	otel.GetTextMapPropagator().Inject(ctx, go_core_observ.MetadataCarrier{md})
+	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	// request the data from grpc
 	res_cardTokenResponse, err := a.serviceClient.GetCardToken(ctx, cardTokenRequest)
