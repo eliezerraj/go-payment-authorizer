@@ -253,6 +253,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess05)
 	
+	// ------------------------  STEP-6 ----------------------------------//	
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - (UPDATE PAYMENT) <===")
 	
 	// update status payment
