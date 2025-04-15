@@ -161,4 +161,3 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 
 	return res_payment_proto_response, nil
 }
-

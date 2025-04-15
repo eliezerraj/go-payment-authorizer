@@ -35,7 +35,7 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 
 // About add payment
 func (w *WorkerRepository) AddPayment(ctx context.Context, tx pgx.Tx, payment *model.Payment) (*model.Payment, error){
-	childLogger.Info().Str("func","AddPayment").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
+	childLogger.Info().Str("func","AddPayment").Interface("trace-request-id", ctx.Value("trace-request-id")).Send()
 
 	// Trace
 	span := tracerProvider.Span(ctx, "database.AddPayment")
@@ -94,7 +94,7 @@ func (w *WorkerRepository) AddPayment(ctx context.Context, tx pgx.Tx, payment *m
 
 // About get terminal
 func (w *WorkerRepository) GetTerminal(ctx context.Context, terminal model.Terminal) (*model.Terminal, error){
-	childLogger.Info().Str("func","GetTerminal").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
+	childLogger.Info().Str("func","GetTerminal").Interface("trace-request-id", ctx.Value("trace-request-id")).Send()
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.GetTerminal")
@@ -147,7 +147,7 @@ func (w *WorkerRepository) GetTerminal(ctx context.Context, terminal model.Termi
 
 // About update payment
 func (w *WorkerRepository) UpdatePayment(ctx context.Context, tx pgx.Tx, payment model.Payment) (int64, error){
-	childLogger.Info().Str("func","UpdatePayment").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
+	childLogger.Info().Str("func","UpdatePayment").Interface("trace-request-id", ctx.Value("trace-request-id")).Send()
 
 	// Trace
 	span := tracerProvider.Span(ctx, "database.UpdatePayment")

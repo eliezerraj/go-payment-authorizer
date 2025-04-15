@@ -187,10 +187,48 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 03 (FRAUD) <===")
 	// Check Fraud
 
+	
 	// ------------------------  STEP-4 ----------------------------------//
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 04 (LEDGER) <===")
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 04 (ACCOUNT) <===")
+	// Check Account
+
+		// prepare headers
+	headers = map[string]string{
+		"Content-Type":  	"application/json;charset=UTF-8",
+		"X-Request-Id": 	trace_id,
+		"x-apigw-api-id": 	s.apiService[4].XApigwApiId,
+		"Host": 			s.apiService[4].HostName,
+	}
+	httpClient = go_core_api.HttpClient {
+		Url: 	fmt.Sprintf("%v%v%v", s.apiService[4].Url, "/getId/", (*res_list_card)[0].FkAccountID) ,
+		Method: s.apiService[4].Method,
+		Timeout: 15,
+		Headers: &headers,
+	}
+
+	res_payload, statusCode, err := apiService.CallRestApi(	ctx,
+															httpClient, 
+															nil)
+	if err != nil {
+		return nil, errorStatusCode(statusCode, s.apiService[4].Name)
+	}
+
+	jsonString, err  = json.Marshal(res_payload)
+	if err != nil {
+		return nil, errors.New(err.Error())
+    }
+	var account_from_parsed model.Account
+	json.Unmarshal(jsonString, &account_from_parsed)
+
+	stepProcess04 := model.StepProcess{	Name: "ACCOUNT-FROM:OK",
+										ProcessedAt: time.Now(),}
+
+	list_stepProcess = append(list_stepProcess, stepProcess04)
+
+	// ------------------------  STEP-5 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 05 (LEDGER) <===")
 	// Access Account (ledger)
-	moviment := model.Moviment{	AccountFrom: model.Account{AccountID: (*res_list_card)[0].AccountID}, 
+	moviment := model.Moviment{	AccountFrom: model.Account{AccountID: account_from_parsed.AccountID}, 
 								Type: "WITHDRAW",
 								Currency: payment.Currency,
 								Amount: payment.Amount }
@@ -218,13 +256,12 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, errorStatusCode(statusCode, s.apiService[2].Name)
 	}
 
-	// add step 04
-	stepProcess04 := model.StepProcess{	Name: "LEDGER:WITHDRAW:OK",
+	stepProcess05 := model.StepProcess{	Name: "LEDGER:WITHDRAW:OK",
 										ProcessedAt: time.Now(),}
-	list_stepProcess = append(list_stepProcess, stepProcess04)
+	list_stepProcess = append(list_stepProcess, stepProcess05)
 
-	// ------------------------  STEP-5 ----------------------------------//
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 05 (CARDS:ATC) <===")
+	// ------------------------  STEP-6 ----------------------------------//
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 06 (CARDS:ATC) <===")
 	// Set headers
 	
 	headers = map[string]string{
@@ -249,12 +286,12 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, errorStatusCode(statusCode, s.apiService[3].Name)
 	}
 
-	stepProcess05 := model.StepProcess{	Name: "CARD-ATC:OK",
+	stepProcess06 := model.StepProcess{	Name: "CARD-ATC:OK",
 										ProcessedAt: time.Now(),}
-	list_stepProcess = append(list_stepProcess, stepProcess05)
+	list_stepProcess = append(list_stepProcess, stepProcess06)
 	
-	// ------------------------  STEP-6 ----------------------------------//	
-	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - (UPDATE PAYMENT) <===")
+	// ------------------------  STEP-7 ----------------------------------//	
+	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP 7- (UPDATE PAYMENT) <===")
 	
 	// update status payment
 	payment.Status = "AUTHORIZATION-GRPC:OK"
@@ -267,11 +304,12 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		return nil, err
 	}
 
-	stepProcess06 := model.StepProcess{Name: "AUTHORIZATION-GRPC:STATUS:OK",
+	stepProcess07 := model.StepProcess{Name: "AUTHORIZATION-GRPC:STATUS:OK",
 										ProcessedAt: time.Now(),}
-	list_stepProcess = append(list_stepProcess, stepProcess06)
+	list_stepProcess = append(list_stepProcess, stepProcess07)
 	payment.StepProcess = &list_stepProcess
 
+		// ------------------------ Final ----------------------------------//	
 	childLogger.Info().Str("func","AddPaymentToken: ===> FINAL").Interface("payment", payment).Send()
 
 	return &payment, nil

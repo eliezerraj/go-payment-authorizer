@@ -53,13 +53,9 @@ func (a *AdapterGrpc) GetCardTokenGrpc(ctx context.Context, card model.Card) (*[
 	cardTokenRequest := &proto.CardTokenRequest{Card: &cardProto}
 
 	// Set header for observability
-	header := metadata.New(map[string]string{ "trace-request-id": fmt.Sprintf("%s",ctx.Value("trace-request-id")) })
-	ctx = metadata.NewOutgoingContext(ctx, header)
-
-	// trace grpc
-	md := metadata.New(nil)
-	otel.GetTextMapPropagator().Inject(ctx, go_core_observ.MetadataCarrier{md})
-	ctx = metadata.NewOutgoingContext(ctx, md)
+	header_grpc := metadata.New(map[string]string{ "trace-request-id": fmt.Sprintf("%s",ctx.Value("trace-request-id")) })
+	otel.GetTextMapPropagator().Inject(ctx, go_core_observ.MetadataCarrier{header_grpc})
+	ctx = metadata.NewOutgoingContext(ctx, header_grpc)
 
 	// request the data from grpc
 	res_cardTokenResponse, err := a.serviceClient.GetCardToken(ctx, cardTokenRequest)

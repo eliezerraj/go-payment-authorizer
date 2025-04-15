@@ -45,7 +45,7 @@ type ApiService struct {
 type Card struct {
 	ID				int			`json:"id,omitempty"`
 	FkAccountID		int			`json:"fk_account_id,omitempty"`
-	AccountID		string		`json:"account_id,omitempty"`	
+	AccountID		string		`json:"account_id,omitempty"`
 	CardNumber		string  	`json:"card_number,omitempty"`
 	TokenData		string  	`json:"token_data,omitempty"`
 	Holder			string  	`json:"holder,omitempty"`
