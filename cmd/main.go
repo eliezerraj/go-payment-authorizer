@@ -1,6 +1,7 @@
 package main
 
 import(
+	"fmt"
 	"time"
 	"context"
 	
@@ -73,12 +74,14 @@ func main()  {
 	// Open client GRPC channel
 	goCoreGrpcClientWorker, err  := goCoreGrpcClientWorker.StartGrpcClient(appServer.ApiService[0].Url)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("erro connect to grpc server")
+		childLogger.Error().Err(err).Msg(fmt.Sprintf("erro connect to grpc server : %v %v",appServer.ApiService[0].Name, appServer.ApiService[0].Url ))
+		panic(3)
 	}
-	// test connection
+	// test connection+
 	err = goCoreGrpcClientWorker.TestConnection(ctx)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("erro connect to grpc server")
+		childLogger.Error().Err(err).Msg(fmt.Sprintf("erro connect to grpc server : %v %v",appServer.ApiService[0].Name, appServer.ApiService[0].Url ))
+		panic(3)
 	} else {
 		childLogger.Info().Msg("gprc channel openned sucessfull")
 	}
