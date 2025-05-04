@@ -72,6 +72,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	if err != nil {
 		return nil, err
 	}
+	defer s.workerRepository.DatabasePGServer.ReleaseTx(conn)
 
 	// Handle the transaction
 	defer func() {
@@ -80,7 +81,6 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		} else {
 			tx.Commit(ctx)
 		}
-		s.workerRepository.DatabasePGServer.ReleaseTx(conn)
 		span.End()
 	}()
 
