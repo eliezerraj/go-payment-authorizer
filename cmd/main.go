@@ -16,7 +16,9 @@ import(
 	go_grpc_client_worker "github.com/eliezerraj/go-core/grpc"	
 	adapter_grpc_client "github.com/go-payment-authorizer/internal/adapter/grpc/client"
 
-	go_core_pg "github.com/eliezerraj/go-core/database/pg"  
+	go_core_pg "github.com/eliezerraj/go-core/database/pg" 
+	go_core_api "github.com/eliezerraj/go-core/api"
+
 	grpc_adapter "github.com/go-payment-authorizer/internal/adapter/grpc/server"
 )
 
@@ -86,10 +88,16 @@ func main()  {
 		childLogger.Info().Msg("gprc channel openned sucessfull")
 	}
 
+	// Create a go-core api service for client http
+	coreRestApiService := go_core_api.NewRestApiService()
+
 	// create and wire
 	adapterGrpcClient := adapter_grpc_client.NewAdapterGrpc(goCoreGrpcClientWorker)
 	database := database.NewWorkerRepository(&databasePGServer)
-	workerService := service.NewWorkerService(database, appServer.ApiService, adapterGrpcClient)
+	workerService := service.NewWorkerService(	*coreRestApiService,
+												database, 
+												appServer.ApiService, 
+												adapterGrpcClient)
 	adapterGrpc := grpc_adapter.NewAdapterGrpc(&appServer, workerService)
 	workerServer := server.NewWorkerServer(adapterGrpc)
 

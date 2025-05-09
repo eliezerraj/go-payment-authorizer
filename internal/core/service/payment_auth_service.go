@@ -23,19 +23,22 @@ var tracerProvider go_core_observ.TracerProvider
 var apiService go_core_api.ApiService
 
 type WorkerService struct {
+	goCoreRestApiService	go_core_api.ApiService
 	apiService			[]model.ApiService
 	workerRepository 	*database.WorkerRepository
 	adapterGrpcClient	*client.AdapterGrpc
 }
 
 // About create a new worker service
-func NewWorkerService(	workerRepository 	*database.WorkerRepository,
+func NewWorkerService(	goCoreRestApiService	go_core_api.ApiService,	
+						workerRepository 	*database.WorkerRepository,
 						apiService			[]model.ApiService,
 						adapterGrpcClient	*client.AdapterGrpc) *WorkerService{
 
 	childLogger.Info().Str("func","NewWorkerService").Send()
 
 	return &WorkerService{
+		goCoreRestApiService: goCoreRestApiService,
 		workerRepository: workerRepository,
 		apiService: apiService,
 		adapterGrpcClient: adapterGrpcClient,
@@ -165,9 +168,10 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	}
 
 	// Call go-limit
-	res_limit, statusCode, err := apiService.CallRestApi(ctx,
-														httpClient, 
-														transactionLimit)
+	res_limit, statusCode, err := apiService.CallRestApiV1(ctx,
+															s.goCoreRestApiService.Client,
+															httpClient, 
+															transactionLimit)
 	if err != nil {
 		return nil, errorStatusCode(statusCode, s.apiService[1].Name)
 	}
@@ -206,7 +210,8 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 		Headers: &headers,
 	}
 
-	res_payload, statusCode, err := apiService.CallRestApi(	ctx,
+	res_payload, statusCode, err := apiService.CallRestApiV1(ctx,
+															s.goCoreRestApiService.Client,
 															httpClient, 
 															nil)
 	if err != nil {
@@ -249,7 +254,8 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	}
 
 	// Call go-ledger
-	_, statusCode, err = apiService.CallRestApi(ctx,
+	_, statusCode, err = apiService.CallRestApiV1(ctx,
+												s.goCoreRestApiService.Client,
 												httpClient, 
 												moviment)
 	if err != nil {
@@ -279,7 +285,8 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	}
 
 	// update card atc
-	_, statusCode, err = apiService.CallRestApi(ctx,
+	_, statusCode, err = apiService.CallRestApiV1(ctx,
+												s.goCoreRestApiService.Client,
 												httpClient, 
 												card)
 	if err != nil {
