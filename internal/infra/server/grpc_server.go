@@ -67,7 +67,7 @@ func (w *WorkerServer) StartGrpcServer(	ctx context.Context,
 
 	res := resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceName("go-payment-authorizer"),
+		semconv.ServiceName(appServer.InfoPod.PodName),
 	)
 
 	tp := sdktrace.NewTracerProvider(
