@@ -97,19 +97,26 @@ type Terminal struct {
 	UpdatedAt		*time.Time 	`json:"updated_at,omitempty"`
 }
 
-type TransactionLimit struct {
-	ID				int			`json:"id,omitempty"`
-	Category		string 		`json:"category,omitempty"`
-	CardNumber		string 		`json:"card_number,omitempty"`
+type Limit struct {
 	TransactionId	string 		`json:"transaction_id,omitempty"`
-	Mcc				string 		`json:"mcc,omitempty"`
-	Status			string 		`json:"status,omitempty"`
-	TransactionAt	time.Time 	`json:"transaction_at,omitempty"`		
-	Currency		string 		`json:"currency,omitempty"`
+	Key				string 		`json:"key,omitempty"`
+	TypeLimit		string 		`json:"type_limit,omitempty"`
+	OrderLimit		string 		`json:"order_limit,omitempty"`
+	CounterLimit	string 		`json:"counter_limit,omitempty"`	
 	Amount			float64 	`json:"amount,omitempty"`
-	SumAmount		float64 	`json:"transaction_sum_amount,omitempty"`
-	SumCount		int 		`json:"transaction_sum_count,omitempty"`
-	TenantID		string 		`json:"tenant_id,omitempty"`
+	Quantity		int 		`json:"quantity,omitempty"`
+}
+
+type LimitTransaction struct {
+	ID				int			`json:"id,omitempty"`
+	TransactionId	string 		`json:"transaction_id,omitempty"`
+	Key				string 		`json:"key,omitempty"`
+	TypeLimit		string 		`json:"type_limit,omitempty"`
+	CounterLimit	string 		`json:"counter_limit,omitempty"`	
+	OrderLimit		string 		`json:"order_limit,omitempty"`	
+	Status			string 		`json:"status,omitempty"`
+	Amount			float64 	`json:"amount,omitempty"`
+	CreareAt		time.Time 	`json:"created_at,omitempty"`			
 }
 
 // go-ledger
