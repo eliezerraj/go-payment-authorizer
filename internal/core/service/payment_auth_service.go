@@ -145,12 +145,13 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	// ------------------------  STEP-2 ----------------------------------//
 	childLogger.Info().Str("func","AddPaymentToken").Msg("===> STEP - 02 (LIMIT) <===")
 	// Check the limits
-	transactionLimit := model.TransactionLimit{ Category: 		"CREDIT",
-												CardNumber: 	payment.CardNumber,
-												TransactionId: 	*payment.TransactionId,
-												Mcc: 			payment.Mcc,
-												Currency:		payment.Currency,
-												Amount:			payment.Amount }
+
+	limit := model.Limit{ 	TransactionId: *payment.TransactionId,
+						  	Key: 	payment.CardNumber,
+							TypeLimit: "CREDIT",
+							OrderLimit: "MCC:" + payment.Mcc,
+							Amount:	payment.Amount,
+							Quantity: 1}
 
 	// Set headers
 	headers := map[string]string{
@@ -161,29 +162,35 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	}
 	// Prepare http client
 	httpClient := go_core_api.HttpClient {
-		Url: fmt.Sprintf("%v%v",s.apiService[1].Url,"/transactionLimit"),
+		Url: fmt.Sprintf("%v%v",s.apiService[1].Url,"/checkLimitTransaction"),
 		Method: s.apiService[1].Method,
 		Timeout: 15,
 		Headers: &headers,
 	}
 
 	// Call go-limit
-	res_limit, statusCode, err := apiService.CallRestApiV1(ctx,
+	res_limit, statusCode, err := apiService.CallRestApiV1(	ctx,
 															s.goCoreRestApiService.Client,
 															httpClient, 
-															transactionLimit)
+															limit)
 	if err != nil {
 		return nil, errorStatusCode(statusCode, s.apiService[1].Name)
 	}
 
+	list_limit_transaction := []model.LimitTransaction{}
 	jsonString, err  := json.Marshal(res_limit)
 	if err != nil {
 		return nil, errors.New(err.Error())
     }
-	json.Unmarshal(jsonString, &transactionLimit)
+	json.Unmarshal(jsonString, &list_limit_transaction)
 	
+	var list_status = []string{}
+	for _, val := range list_limit_transaction {
+		list_status = append(list_status, val.Status)
+	}
+
 	// add step 02
-	stepProcess02 := model.StepProcess{	Name: fmt.Sprintf("LIMIT:%v", transactionLimit.Status),
+	stepProcess02 := model.StepProcess{	Name: fmt.Sprintf("LIMIT:%v", list_status),
 										ProcessedAt: time.Now(),}
 	list_stepProcess = append(list_stepProcess, stepProcess02)
 
