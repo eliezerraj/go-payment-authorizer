@@ -1,5 +1,5 @@
 # go-payment-authorizer
-worklod for POC purposes
+worklod for POC purposes. It is simulate a card payment synch
 
 # usecase
     AddPaymentToken
