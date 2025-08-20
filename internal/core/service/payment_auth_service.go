@@ -46,7 +46,7 @@ func NewWorkerService(	goCoreRestApiService	go_core_api.ApiService,
 }
 
 // About handle/convert http status code
-func errorStatusCode(statusCode int, serviceName string) error{
+func errorStatusCode(statusCode int, serviceName string,  msg_err error) error{
 	childLogger.Info().Str("func","errorStatusCode").Interface("serviceName", serviceName).Interface("statusCode", statusCode).Send()
 	var err error
 	switch statusCode {
@@ -57,7 +57,7 @@ func errorStatusCode(statusCode int, serviceName string) error{
 		case http.StatusNotFound:
 			err = erro.ErrNotFound
 		default:
-			err = errors.New(fmt.Sprintf("service %s in outage", serviceName))
+			err = errors.New(fmt.Sprintf("service %s in outage => cause error: %s", serviceName, msg_err.Error() ))
 		}
 	return err
 }
@@ -174,7 +174,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 															httpClient, 
 															limit)
 	if err != nil {
-		return nil, errorStatusCode(statusCode, s.apiService[1].Name)
+		return nil, errorStatusCode(statusCode, s.apiService[1].Name, err)
 	}
 
 	list_limit_transaction := []model.LimitTransaction{}
@@ -222,7 +222,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 															httpClient, 
 															nil)
 	if err != nil {
-		return nil, errorStatusCode(statusCode, s.apiService[4].Name)
+		return nil, errorStatusCode(statusCode, s.apiService[4].Name, err)
 	}
 
 	jsonString, err  = json.Marshal(res_payload)
@@ -266,7 +266,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 												httpClient, 
 												moviment)
 	if err != nil {
-		return nil, errorStatusCode(statusCode, s.apiService[2].Name)
+		return nil, errorStatusCode(statusCode, s.apiService[2].Name, err)
 	}
 
 	stepProcess05 := model.StepProcess{	Name: "LEDGER:WITHDRAW:OK",
@@ -297,7 +297,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 												httpClient, 
 												card)
 	if err != nil {
-		return nil, errorStatusCode(statusCode, s.apiService[3].Name)
+		return nil, errorStatusCode(statusCode, s.apiService[3].Name, err)
 	}
 
 	stepProcess06 := model.StepProcess{	Name: "CARD-ATC:OK",
