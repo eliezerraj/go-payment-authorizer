@@ -7,7 +7,7 @@ metadata:
     app: *app-name
 data:
   API_VERSION: "3.2"
-  POD_NAME: "go-payment-authorizer.k8"
+  POD_NAME: "go-payment-authorizer.eks-arch-01"
   PORT: ":65000"
   DB_HOST: "rds-proxy-db-arch.proxy-couoacqalfwt.us-east-2.rds.amazonaws.com"
   DB_PORT: "5432"
@@ -45,6 +45,3 @@ data:
   URL_SERVICE_04: "https://nlb-eks-arch-01.architecture.caradhras.io"
   METHOD_SERVICE_04: "GET"
   HOST_SERVICE_04: "go-account.architecture.caradhras.io"
-
-  #URL_SERVICE_04: "https://vpce.global.dev.caradhras.io/pv"
-  #X_APIGW_API_ID_SERVICE_04: "129t4y8eoj"
