@@ -164,7 +164,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	httpClient := go_core_api.HttpClient {
 		Url: fmt.Sprintf("%v%v",s.apiService[1].Url,"/checkLimitTransaction"),
 		Method: s.apiService[1].Method,
-		Timeout: 15,
+		Timeout: s.apiService[1].HttpTimeout,
 		Headers: &headers,
 	}
 
@@ -213,7 +213,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	httpClient = go_core_api.HttpClient {
 		Url: 	fmt.Sprintf("%v%v%v", s.apiService[4].Url, "/getId/", (*res_list_card)[0].FkAccountID) ,
 		Method: s.apiService[4].Method,
-		Timeout: 15,
+		Timeout: s.apiService[4].HttpTimeout,
 		Headers: &headers,
 	}
 
@@ -256,7 +256,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	httpClient = go_core_api.HttpClient {
 		Url: 	s.apiService[2].Url + "/movimentTransaction",
 		Method: s.apiService[2].Method,
-		Timeout: 15,
+		Timeout: s.apiService[2].HttpTimeout,
 		Headers: &headers,
 	}
 
@@ -287,7 +287,7 @@ func (s * WorkerService) AddPaymentToken(ctx context.Context, payment model.Paym
 	httpClient = go_core_api.HttpClient {
 		Url: 	s.apiService[3].Url + "/atc",
 		Method: s.apiService[3].Method,
-		Timeout: 15,
+		Timeout: s.apiService[3].HttpTimeout,
 		Headers: &headers,
 	}
 
