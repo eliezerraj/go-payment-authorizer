@@ -32,10 +32,11 @@ import (
 	grpc_adapter "github.com/go-payment-authorizer/internal/adapter/grpc/server"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.infra.server").Logger()
-
-var adapterGrpc grpc_adapter.AdapterGrpc
-var tracer trace.Tracer
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.infra.server").Logger()
+	adapterGrpc grpc_adapter.AdapterGrpc
+	tracer trace.Tracer
+)
 
 type WorkerServer struct {
 	adapterGrpc *grpc_adapter.AdapterGrpc

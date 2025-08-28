@@ -27,8 +27,10 @@ import (
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc.server").Logger()
-var tracerProvider go_core_observ.TracerProvider
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc.server").Logger()
+	tracerProvider go_core_observ.TracerProvider
+)
 
 type AdapterGrpc struct{
 	appServer 		*model.AppServer

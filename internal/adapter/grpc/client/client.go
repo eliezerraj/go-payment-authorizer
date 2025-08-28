@@ -18,9 +18,11 @@ import (
 	//proto "github.com/eliezerraj/go-grpc-proto/protogen/token"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc.client").Logger()
-var tracerProvider go_core_observ.TracerProvider
-var tokenServiceClient	proto.TokenServiceClient
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.grpc.client").Logger()
+	tracerProvider go_core_observ.TracerProvider
+	tokenServiceClient	proto.TokenServiceClient
+)
 
 type AdapterGrpc struct {
 	grpcClientWorker	*go_grpc_client.GrpcClientWorker

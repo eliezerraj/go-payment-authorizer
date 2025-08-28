@@ -8,9 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
   )
 
-
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.healthcheck").Logger()
-var startTime = time.Now()
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.healthcheck").Logger()
+	startTime = time.Now()
+)
 
 type HealthChecker struct{}
 
