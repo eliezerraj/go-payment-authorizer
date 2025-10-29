@@ -13,12 +13,12 @@ import (
 
 	go_core_observ "github.com/eliezerraj/go-core/observability"
 	go_core_pg "github.com/eliezerraj/go-core/database/pg"
-
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.database").Logger()
-
-var tracerProvider go_core_observ.TracerProvider
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.database").Logger()
+	tracerProvider go_core_observ.TracerProvider
+)
 
 type WorkerRepository struct {
 	DatabasePGServer *go_core_pg.DatabasePGServer

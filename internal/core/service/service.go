@@ -18,9 +18,11 @@ import(
 	go_core_api "github.com/eliezerraj/go-core/api"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.core.service").Logger()
-var tracerProvider go_core_observ.TracerProvider
-var apiService go_core_api.ApiService
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.core.service").Logger()
+	tracerProvider go_core_observ.TracerProvider
+	apiService go_core_api.ApiService
+)
 
 type WorkerService struct {
 	goCoreRestApiService	go_core_api.ApiService

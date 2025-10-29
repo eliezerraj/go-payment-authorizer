@@ -21,7 +21,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/contrib/propagators/aws/xray"
+	//"go.opentelemetry.io/contrib/propagators/aws/xray"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
@@ -32,10 +33,11 @@ import (
 	grpc_adapter "github.com/go-payment-authorizer/internal/adapter/grpc/server"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.infra.server").Logger()
-
-var adapterGrpc grpc_adapter.AdapterGrpc
-var tracer trace.Tracer
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.infra.server").Logger()
+	adapterGrpc grpc_adapter.AdapterGrpc
+	tracer trace.Tracer
+)
 
 type WorkerServer struct {
 	adapterGrpc *grpc_adapter.AdapterGrpc
@@ -63,7 +65,7 @@ func (w *WorkerServer) StartGrpcServer(	ctx context.Context,
 	if err != nil {
 		childLogger.Error().Err(err).Msg("erro otlptracegrpc")
 	}
-	idg := xray.NewIDGenerator()
+	//idg := xray.NewIDGenerator()
 
 	res := resource.NewWithAttributes(
 		semconv.SchemaURL,
@@ -74,11 +76,12 @@ func (w *WorkerServer) StartGrpcServer(	ctx context.Context,
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(traceExporter),
 		sdktrace.WithResource(res),
-		sdktrace.WithIDGenerator(idg),
+		//sdktrace.WithIDGenerator(idg),
 	)
 
 	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(xray.Propagator{})
+	//otel.SetTextMapPropagator(xray.Propagator{})
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 	tracer = otel.Tracer(appServer.InfoPod.PodName)
 
 	// create grpc listener

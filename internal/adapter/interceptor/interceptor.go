@@ -12,8 +12,10 @@ import(
 	go_core_observ "github.com/eliezerraj/go-core/observability"
 )
 
-var childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.interceptor").Logger()
-var tracerProvider go_core_observ.TracerProvider
+var (
+	childLogger = log.With().Str("component","go-payment-authorizer").Str("package","internal.adapter.interceptor").Logger()
+	tracerProvider go_core_observ.TracerProvider
+)
 
 // About authentication intercetor
 func ServerUnaryInterceptor(	ctx context.Context, 
