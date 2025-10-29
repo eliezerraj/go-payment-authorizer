@@ -19,12 +19,12 @@ import (
 
 	token_proto_service "github.com/go-payment-authorizer/protogen/token"
 	proto "github.com/go-payment-authorizer/protogen/token"
-	//proto "github.com/eliezerraj/go-grpc-proto/protogen/token"
 
 	go_core_observ "github.com/eliezerraj/go-core/observability"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/contrib/propagators/aws/xray"
+	//"go.opentelemetry.io/contrib/propagators/aws/xray"
+	//"go.opentelemetry.io/otel/propagation"
 )
 
 var (
@@ -75,8 +75,13 @@ func (a *AdapterGrpc) AddPaymentToken(ctx context.Context, paymentRequest *proto
 	childLogger.Info().Str("func","AddPaymentToken").Interface("paymentRequest", paymentRequest).Send()
 
 	// get span trace-id
-	otel.SetTextMapPropagator(xray.Propagator{})
-	md, _ := metadata.FromIncomingContext(ctx)
+	//otel.SetTextMapPropagator(xray.Propagator{})
+	//otel.SetTextMapPropagator(propagation.TraceContext{})
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		childLogger.Warn().Msg("no metadata found in incoming context")
+	}
+		
 	ctx = otel.GetTextMapPropagator().Extract(ctx, go_core_observ.MetadataCarrier{md})
 
 	// Trace
